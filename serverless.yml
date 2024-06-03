@@ -1,0 +1,161 @@
+service: serverless
+	
+package:
+  individually: true
+
+plugins:
+  - serverless-package-python-functions
+
+params:
+  dev:
+    debug: T
+  prod:
+    debug: F
+
+custom:
+  bucketName: ${self:service}-${sls:stage}-erp-data-bucket
+  	
+  pkgPyFuncs:
+    buildDir: _build
+    requirementsFile: 'requirements.txt'
+    globalRequirements:
+      - ./requirements.txt
+    cleanup: true
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 25
+  architecture: arm64
+  environment:
+    debug: ${self:params.${sls:stage}.debug}
+    region: ${aws:region}
+
+  httpApi:
+    name: ${self:service}-${sls:stage}-httpapi
+
+  s3:
+    bucketOne:
+      name: ${self:custom.bucketName}
+
+functions:
+  crm:
+    handler: handler.main
+    name: ${self:service}-${sls:stage}-process-crm-data
+    role: CrmLambdaPermission
+    environment:
+      erp_bucket_name: ${self:custom.bucketName}
+    events:
+      - s3:
+          bucket: bucketOne
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .json
+    package:
+      include:
+        - crm
+      artifact: ${self:custom.pkgPyFuncs.buildDir}/${self:service}-${sls:stage}-process-crm-data.zip
+
+  erp:
+    handler: handler.main
+    name: ${self:service}-${sls:stage}-process-erp-data
+    role: ErpLambdaPermission
+    environment:
+      erp_bucket_name: ${self:custom.bucketName}
+    events:
+      - httpApi: 'GET /erp'
+    package:
+      include:
+        - erp
+      artifact: ${self:custom.pkgPyFuncs.buildDir}/${self:service}-${sls:stage}-process-erp-data.zip
+
+
+resources:
+  Resources:
+    ErpLambdaPermission:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-${sls:stage}-ErpLambdaPermission
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:service}-${sls:stage}-ErpLambdaCreateLogs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:TagResource
+                  Resource:
+                    - !Join [ ":", [ "arn:aws:logs", !Ref AWS::Region, !Ref AWS::AccountId, "log-group", "/aws/lambda/${self:service}-${sls:stage}*", "*"]]
+          - PolicyName: ${self:service}-${sls:stage}-ErpLambdaPutLogs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                  Resource:
+                    - !Join [ ":", [ "arn:aws:logs", !Ref AWS::Region, !Ref AWS::AccountId, "log-group", "/aws/lambda/${self:service}-${sls:stage}*", "*", "*" ]]
+          - PolicyName: ${self:service}-${sls:stage}-ErpLambdaPermissionWriteS3
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                  Resource:
+                    - !Sub arn:aws:s3:::${self:custom.bucketName}/*
+                    - !Sub arn:aws:s3:::${self:custom.bucketName}
+    CrmLambdaPermission:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-${sls:stage}-CrmLambdaPermission
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:service}-${sls:stage}-CrmLambdaCreateLogs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:TagResource
+                  Resource:
+                    - !Join [ ":", [ "arn:aws:logs", !Ref AWS::Region, !Ref AWS::AccountId, "log-group", "/aws/lambda/${self:service}-${sls:stage}*", "*"]]
+          - PolicyName: ${self:service}-${sls:stage}-CrmLambdaPutLogs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                  Resource:
+                    - !Join [ ":", [ "arn:aws:logs", !Ref AWS::Region, !Ref AWS::AccountId, "log-group", "/aws/lambda/${self:service}-${sls:stage}*", "*", "*" ]]
+          - PolicyName: ${self:service}-${sls:stage}-CrmLambdaPermissionWriteS3
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:GetObject
+                  Resource:
+                    - !Sub arn:aws:s3:::${self:custom.bucketName}/*
+                    - !Sub arn:aws:s3:::${self:custom.bucketName}
