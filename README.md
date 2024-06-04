@@ -36,13 +36,17 @@ npm install --save serverless-package-python-functions
 ## Configurações
 
 ### Ter uma conta na AWS para criação de um Usuário IAM
-![Screenshot from 2024-05-31 23-19-42](https://github.com/WeslleySilvaa20/serverless-backend/assets/171616751/5f36d470-41da-4be0-a160-e1c65b2060be)
-![Screenshot from 2024-05-31 23-22-08](https://github.com/WeslleySilvaa20/serverless-backend/assets/171616751/aed1fe3e-7e32-47d2-a5dd-56d085e38837)
-![Screenshot from 2024-05-31 23-23-39](https://github.com/WeslleySilvaa20/serverless-backend/assets/171616751/190b6f9e-9921-4179-a2ea-53501b03cd92)
+![Screenshot from 2024-05-31 23-19-42](https://github.com/weslleysilvaa27/serverless-backend/assets/171731302/cedda78e-16d6-4e98-84a7-707b04e66d5a)
+
+![Screenshot from 2024-05-31 23-22-08](https://github.com/weslleysilvaa27/serverless-backend/assets/171731302/a20465af-86a7-4b0a-b81f-d719a4c1a469)
+
+![Screenshot from 2024-05-31 23-23-39](https://github.com/weslleysilvaa27/serverless-backend/assets/171731302/bc9320f1-799d-497f-956c-0a3c9570363a)
+
 
 
 ### Selecionar a Aba Credenciais de Segurança e criar a Chaves de acesso para obter o AccessKey e SecretKey
-![Screenshot from 2024-05-31 23-24-28](https://github.com/WeslleySilvaa20/serverless-backend/assets/171616751/934327fd-176e-4326-ae7a-615c4e114b2e)
+![Screenshot from 2024-05-31 23-24-28](https://github.com/weslleysilvaa27/serverless-backend/assets/171731302/9e28dbcb-6b30-4d2b-ab20-8b318ff8719c)
+
 
 
 ###
@@ -59,7 +63,8 @@ aws configure
 ```
 serverless deploy
 ```
-![Screenshot from 2024-05-31 23-41-35](https://github.com/WeslleySilvaa20/serverless-backend/assets/171616751/1eb5e512-4c8a-4b38-9ffd-934a99f7f4b5)
+![Screenshot from 2024-05-31 23-41-35](https://github.com/weslleysilvaa27/serverless-backend/assets/171731302/71f64613-3f54-4a3d-b9f2-7f8a276c8097)
+
 
 
 ### Dropar a aplicação
